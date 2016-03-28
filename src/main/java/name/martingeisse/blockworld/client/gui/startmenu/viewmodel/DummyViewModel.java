@@ -8,6 +8,9 @@ package name.martingeisse.blockworld.client.gui.startmenu.viewmodel;
 
 import java.util.Arrays;
 import java.util.List;
+import com.google.inject.Inject;
+import name.martingeisse.blockworld.client.ingame.IngameFrameHandler;
+import name.martingeisse.blockworld.client.shell.FrameLoop;
 import name.martingeisse.blockworld.common.faction.Faction;
 
 /**
@@ -15,9 +18,22 @@ import name.martingeisse.blockworld.common.faction.Faction;
  */
 public class DummyViewModel implements ViewModel {
 
+	private final FrameLoop frameLoop;
+	private final IngameFrameHandler ingameFrameHandler;
+
 	private Faction faction;
 	private boolean exitRequested;
-	private String playerCharacterToken;
+
+	/**
+	 * Constructor.
+	 * @param frameLoop (injected)
+	 * @param ingameFrameHandler (injected)
+	 */
+	@Inject
+	public DummyViewModel(final FrameLoop frameLoop, final IngameFrameHandler ingameFrameHandler) {
+		this.frameLoop = frameLoop;
+		this.ingameFrameHandler = ingameFrameHandler;
+	}
 
 	// override
 	@Override
@@ -90,14 +106,10 @@ public class DummyViewModel implements ViewModel {
 
 	// override
 	@Override
-	public void requestPlayCharacterToken(final String characterId) {
-		playerCharacterToken = characterId; // TODO use a real token
-	}
-
-	// override
-	@Override
-	public String getPlayCharacterToken() {
-		return playerCharacterToken;
+	public void playCharacter(final String characterId) {
+		final String playCharacterToken = characterId; // TODO use a real token
+		ingameFrameHandler.resumePlayer(playCharacterToken);
+		frameLoop.setFrameHandler(ingameFrameHandler);
 	}
 
 	// override

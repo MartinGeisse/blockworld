@@ -28,6 +28,7 @@ import name.martingeisse.blockworld.client.ingame.IngameFrameHandler;
 import name.martingeisse.blockworld.client.network.ClientToServerTransmitter;
 import name.martingeisse.blockworld.client.network.ServerToClientReceiver;
 import name.martingeisse.blockworld.client.shell.ClientLauncher;
+import name.martingeisse.blockworld.client.shell.FrameLoop;
 import name.martingeisse.blockworld.client.shell.OpenglLauncher;
 import name.martingeisse.blockworld.common.util.task.TaskSystem;
 import name.martingeisse.blockworld.server.MinerServer;
@@ -81,6 +82,7 @@ public class Main extends AbstractModule {
 		
 		bind(ClientLauncher.class).in(Singleton.class);
 		bind(OpenglLauncher.class).in(Singleton.class);
+		bind(FrameLoop.class).in(Singleton.class);
 		bind(StartmenuFrameHandler.class).in(Singleton.class);
 		bind(ViewModel.class).to(DummyViewModel.class).in(Singleton.class);
 		bind(IngameFrameHandler.class).in(Singleton.class);

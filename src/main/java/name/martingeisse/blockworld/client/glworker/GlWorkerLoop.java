@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
  *
  * This class also keeps a second threshold called the "overload threshold" that
  * should be slightly less than the frame skip threshold. When the number of
- * "todo" frames exceeds this threshold, the worker loop is overloaded and the
+ * pending frames exceeds this threshold, the worker loop is overloaded and the
  * high-level rendering threads should render fewer frames. Ideally, the frame
  * skip threshold is never reached because high-level rendering code drops frames
  * this way. Whenever the GL worker loop *does* cross the frame skip threshold,

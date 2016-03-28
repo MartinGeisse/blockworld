@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
+import com.google.inject.Inject;
 import name.martingeisse.blockworld.client.glworker.GlWorkUnit;
 import name.martingeisse.blockworld.client.glworker.GlWorkerLoop;
 
@@ -56,10 +57,10 @@ public final class FrameLoop {
 	/**
 	 * Constructor.
 	 */
+	@Inject
 	public FrameLoop() {
 		this.frameHandler = null;
 		this.stepInterval = 10;
-		this.lastStepTime = System.currentTimeMillis();
 	}
 
 	/**
@@ -102,6 +103,7 @@ public final class FrameLoop {
 	 */
 	public void executeLoop() {
 		try {
+			lastStepTime = System.currentTimeMillis();
 			while (true) {
 				
 				// obtain current settings

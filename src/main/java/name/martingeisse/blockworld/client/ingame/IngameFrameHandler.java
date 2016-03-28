@@ -511,13 +511,6 @@ public class IngameFrameHandler implements FrameHandler {
 	@Override
 	public void draw() {
 
-		// clear the screen TODO only depth needed, maybe not even that if the cloud-box initializes depth
-		GlWorkerLoop.getInstance().schedule(() -> {
-			glDepthMask(true);
-			glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		});
-
 		// determine player's position as integers
 		final int playerX = (int)(Math.floor(player.getPosition().getX()));
 		final int playerY = (int)(Math.floor(player.getPosition().getY()));
@@ -564,7 +557,7 @@ public class IngameFrameHandler implements FrameHandler {
 			}
 		});
 
-		// actually draw the world TODO pass the GL worker
+		// actually draw the world
 		workingSet.draw(new FrameRenderParameters(playerX, playerY, playerZ));
 
 		// post-draw code, again in the GL worker thread

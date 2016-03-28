@@ -65,18 +65,11 @@ public interface ViewModel {
 	public void deleteCharacter(String id);
 
 	/**
-	 * Requests a token that is needed to play a character.
+	 * Switches to the in-game frame handler, playing the specified character.
 	 * 
 	 * @param characterId the character's ID
 	 */
-	public void requestPlayCharacterToken(String characterId);
-	
-	/**
-	 * Returns the token previously requested by {@link #requestPlayCharacterToken(String)}.
-	 * 
-	 * @return the token
-	 */
-	public String getPlayCharacterToken();
+	public void playCharacter(String characterId);
 	
 	/**
 	 * Requests exiting the program. This does not exit immediately, but only requests exiting

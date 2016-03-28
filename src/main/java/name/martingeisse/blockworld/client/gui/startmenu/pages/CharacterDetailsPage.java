@@ -100,22 +100,12 @@ public class CharacterDetailsPage extends AbstractStartmenuPage {
 	 */
 	private void play() {
 		try {
-			getViewModel().requestPlayCharacterToken(characterDetails.getId());
+			getViewModel().playCharacter(characterDetails.getId());
 		} catch (Exception e) {
 			setPopupElement(new MessageBox(e.toString()));
 			return;
 		}
-		getGui().addFollowupOpenglAction(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					// TODO Main.frameLoop.getRootHandler().setWrappedHandler(new IngameHandler());
-					MouseUtil.grab();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		});
+		MouseUtil.grab();
 	}
 
 }

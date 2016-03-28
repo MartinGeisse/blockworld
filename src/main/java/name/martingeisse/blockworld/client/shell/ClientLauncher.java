@@ -23,17 +23,20 @@ public class ClientLauncher implements Runnable {
 	 */
 	private static Logger logger = Logger.getLogger(ClientLauncher.class);
 
+	private final FrameLoop frameLoop;
 	@SuppressWarnings("unused")
 	private final StartmenuFrameHandler startmenuFrameHandler;
 	private final IngameFrameHandler ingameFrameHandler;
 
 	/**
 	 * Constructor.
+	 * @param frameLoop (injected)
 	 * @param startmenuFrameHandler (injected)
 	 * @param ingameFrameHandler (injected)
 	 */
 	@Inject
-	public ClientLauncher(final StartmenuFrameHandler startmenuFrameHandler, final IngameFrameHandler ingameFrameHandler) {
+	public ClientLauncher(final FrameLoop frameLoop, final StartmenuFrameHandler startmenuFrameHandler, final IngameFrameHandler ingameFrameHandler) {
+		this.frameLoop = frameLoop;
 		this.startmenuFrameHandler = startmenuFrameHandler;
 		this.ingameFrameHandler = ingameFrameHandler;
 	}
@@ -46,22 +49,22 @@ public class ClientLauncher implements Runnable {
 		logger.trace("waiting for OpenGL worker loop to be initialized...");
 		GlWorkerLoop.waitUntilInitialized();
 		logger.trace("OpenGL worker loop told me it has been initialized");
-		
+
 		logger.trace("initializing in-game frame handler...");
 		ingameFrameHandler.initialize();
-		ingameFrameHandler.resumePlayer("foo"); // TODO take from start menu
+		ingameFrameHandler.resumePlayer("foo"); // TODO remove when we have a start menu
 		logger.trace("in-game frame handler initialized");
 
 		// TODO remove when we have a start menu
 		MouseUtil.grab();
 
 		logger.trace("starting frame loop!");
-		final FrameLoop frameLoop = new FrameLoop();
-		frameLoop.setFrameHandler(ingameFrameHandler); // TODO change
+		frameLoop.setFrameHandler(ingameFrameHandler); // TODO change to startmenuFrameHandler
+		//		frameLoop.setFrameHandler(startmenuFrameHandler);
 		frameLoop.executeLoop();
 		GlWorkerLoop.getInstance().scheduleStop();
 		logger.trace("frame loop finished!");
-		
+
 	}
 
 }
