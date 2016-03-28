@@ -59,14 +59,6 @@ public class TaskArray implements TaskLike {
 
 	// override
 	@Override
-	public void scheduleRelative(final long milliseconds) {
-		for (final TaskLike task : tasks) {
-			task.scheduleRelative(milliseconds);
-		}
-	}
-
-	// override
-	@Override
 	public void scheduleRelative(final long delay, final TimeUnit timeUnit) {
 		for (final TaskLike task : tasks) {
 			task.scheduleRelative(delay, timeUnit);

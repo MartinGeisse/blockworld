@@ -7,7 +7,6 @@
 package name.martingeisse.blockworld.client.console;
 
 import com.google.inject.Inject;
-import name.martingeisse.blockworld.client.glworker.GlWorkerLoop;
 import name.martingeisse.blockworld.client.network.ClientToServerTransmitter;
 import name.martingeisse.blockworld.client.shell.BreakFrameLoopException;
 import name.martingeisse.blockworld.common.network.c2s_message.ConsoleCommandMessage;

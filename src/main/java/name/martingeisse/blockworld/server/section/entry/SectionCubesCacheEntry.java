@@ -13,7 +13,6 @@ import name.martingeisse.blockworld.common.geometry.RectangularRegion;
 import name.martingeisse.blockworld.common.geometry.SectionId;
 import name.martingeisse.blockworld.common.protocol.SectionDataId;
 import name.martingeisse.blockworld.common.protocol.SectionDataType;
-import name.martingeisse.blockworld.server.edit.EditAccess;
 import name.martingeisse.blockworld.server.section.SectionWorkingSet;
 
 /**
@@ -151,26 +150,6 @@ public final class SectionCubesCacheEntry extends SectionDataCacheEntry {
 			
 		}
 
-	}
-
-	/**
-	 * Returns an {@link EditAccess} for this section. Editing uses coordinates that
-	 * are absolute to the world.
-	 * 
-	 * @return the edit access
-	 */
-	public EditAccess getAbsoluteEditAccess() {
-		return new EditAccess(new SectionAbsoluteEditAccessHost(this));
-	}
-
-	/**
-	 * Returns an {@link EditAccess} for this section. Editing uses coordinates that
-	 * are relative to this section's origin.
-	 * 
-	 * @return the edit access
-	 */
-	public EditAccess getRelativeEditAccess() {
-		return new EditAccess(new SectionRelativeEditAccessHost(this));
 	}
 
 	// override

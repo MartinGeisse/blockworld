@@ -19,13 +19,6 @@ public interface TaskLike {
 	public void schedule();
 	
 	/**
-	 * Schedules this task-like object to run N milliseconds in the future.
-	 * 
-	 * @param milliseconds the number of milliseconds to run in the future
-	 */
-	public void scheduleRelative(long milliseconds);
-	
-	/**
 	 * Schedules this task-like object to run in N milliseconds.
 	 * 
 	 * @param delay the delay to wait before execution

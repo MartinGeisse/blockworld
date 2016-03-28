@@ -18,17 +18,7 @@ public abstract class Task implements TaskLike, Runnable {
 	 */
 	@Override
 	public final void schedule() {
-		TaskSystem.executorService.execute(this);
-	}
-	
-	/**
-	 * Schedules this task to run N milliseconds in the future.
-	 * 
-	 * @param milliseconds the number of milliseconds to run in the future
-	 */
-	@Override
-	public final void scheduleRelative(long milliseconds) {
-		TaskSystem.executorService.schedule(this, milliseconds, TimeUnit.MILLISECONDS);
+		TaskSystem.schedule(this);
 	}
 	
 	/**
@@ -39,7 +29,7 @@ public abstract class Task implements TaskLike, Runnable {
 	 */
 	@Override
 	public final void scheduleRelative(long delay, TimeUnit timeUnit) {
-		TaskSystem.executorService.schedule(this, delay, timeUnit);
+		TaskSystem.schedule(this, delay, timeUnit);
 	}
 	
 }

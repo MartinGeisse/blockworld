@@ -57,18 +57,7 @@ public abstract class Goal implements TaskLike {
 	@Override
 	public final void schedule() {
 		prepareSchedule();
-		TaskSystem.executorService.execute(new StartGoalRunnable());
-	}
-	
-	/**
-	 * Schedules this goal to run N milliseconds in the future.
-	 * 
-	 * @param milliseconds the number of milliseconds to run in the future
-	 */
-	@Override
-	public final void scheduleRelative(long milliseconds) {
-		prepareSchedule();
-		TaskSystem.executorService.schedule(new StartGoalRunnable(), milliseconds, TimeUnit.MILLISECONDS);
+		TaskSystem.schedule(new StartGoalRunnable());
 	}
 	
 	/**
@@ -80,7 +69,7 @@ public abstract class Goal implements TaskLike {
 	@Override
 	public final void scheduleRelative(long delay, TimeUnit timeUnit) {
 		prepareSchedule();
-		TaskSystem.executorService.schedule(new StartGoalRunnable(), delay, timeUnit);
+		TaskSystem.schedule(new StartGoalRunnable(), delay, timeUnit);
 	}
 	
 	/**

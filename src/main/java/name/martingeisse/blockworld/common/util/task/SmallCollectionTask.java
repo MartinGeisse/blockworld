@@ -115,13 +115,6 @@ public abstract class SmallCollectionTask<T> extends TaskArray {
 	
 	// override
 	@Override
-	public void scheduleRelative(long milliseconds) {
-		prepare();
-		super.scheduleRelative(milliseconds);
-	}
-	
-	// override
-	@Override
 	public void scheduleRelative(long delay, TimeUnit timeUnit) {
 		prepare();
 		super.scheduleRelative(delay, timeUnit);

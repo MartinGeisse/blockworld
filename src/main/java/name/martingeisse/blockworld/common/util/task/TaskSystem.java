@@ -9,11 +9,14 @@ package name.martingeisse.blockworld.common.util.task;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.apache.log4j.Logger;
 
 /**
  * This class manages execution of tasks.
  */
 public final class TaskSystem {
+
+	private static Logger logger = Logger.getLogger(TaskSystem.class);
 
 	/**
 	 * Prevent instantiation.
@@ -24,7 +27,7 @@ public final class TaskSystem {
 	/**
 	 * the executorService
 	 */
-	static final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(4);
+	private static final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(4);
 	
 	/**
 	 * Initializes the task system. The thread calling this method is not, and cannot become,
@@ -48,11 +51,33 @@ public final class TaskSystem {
 	}
 
 	/**
-	 * Getter method for the executorService.
-	 * @return the executorService
+	 * Schedules the specified runnable.
+	 * 
+	 * @param r the runnable to schedule
 	 */
-	public static ScheduledExecutorService getExecutorService() {
-		return executorService;
+	public static void schedule(Runnable r) {
+		executorService.execute(wrap(r));
+	}
+	
+	/**
+	 * Schedules the specified runnable to run later.
+	 * 
+	 * @param r the runnable to schedule
+	 * @param delay the amount of time to run in the future
+	 * @param timeUnit the unit for the delay
+	 */
+	public static void schedule(Runnable r, long delay, TimeUnit timeUnit) {
+		executorService.schedule(r, delay, timeUnit);
+	}
+	
+	private static Runnable wrap(Runnable r) {
+		return () -> {
+			try {
+				r.run();
+			} catch (Throwable t) {
+				logger.error("uncaught exception in task that ran in the task system", t);
+			}
+		};
 	}
 	
 }

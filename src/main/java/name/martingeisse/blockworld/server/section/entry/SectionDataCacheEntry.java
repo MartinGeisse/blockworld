@@ -6,6 +6,7 @@
 
 package name.martingeisse.blockworld.server.section.entry;
 
+import java.util.concurrent.TimeUnit;
 import name.martingeisse.blockworld.common.protocol.SectionDataId;
 import name.martingeisse.blockworld.common.util.task.Task;
 import name.martingeisse.blockworld.server.section.SectionWorkingSet;
@@ -88,7 +89,7 @@ public abstract class SectionDataCacheEntry {
 				public void run() {
 					save();
 				}
-			}.scheduleRelative(2000);
+			}.scheduleRelative(2000, TimeUnit.MILLISECONDS);
 		}
 		onModification();
 	}

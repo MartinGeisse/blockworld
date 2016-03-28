@@ -72,7 +72,12 @@ public final class MinerServer {
 				session.sendMessage(new OtherCharactersUpdateMessage(ImmutableList.copyOf(entries)));
 			}
 		});
+		
+		// This currently happens in the main thread when Guice creates objects.
+		// That's OK because letting the client connect before the world has been
+		// generated is useless anyway.
 		initializeWorldWithHeightField();
+		
 	}
 
 	/**
