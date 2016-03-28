@@ -358,7 +358,7 @@ public final class TerrainGenerator {
 			}
 			
 			// compress section data and send it to storage
-			final byte[] compressedCubes = Cubes.createFromCubes(GeometryConstants.SECTION_CLUSTER_SIZE, cubes).compressToByteArray(GeometryConstants.SECTION_CLUSTER_SIZE);
+			final byte[] compressedCubes = Cubes.createFromCubes(cubes).compressToByteArray();
 			storage.saveSectionRelatedObject(new SectionDataId(sectionId, SectionDataType.DEFINITIVE), compressedCubes);
 		}
 		logger.debug("random terrain generated for section column at " + sectionX + ", " + sectionZ);

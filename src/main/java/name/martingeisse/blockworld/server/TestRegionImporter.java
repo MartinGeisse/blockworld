@@ -209,7 +209,7 @@ public final class TestRegionImporter {
 				SectionId modifiedSectionId = new SectionId(modifiedSectionX, modifiedSectionY, modifiedSectionZ);
 				SectionDataId sectionDataId = new SectionDataId(modifiedSectionId, SectionDataType.DEFINITIVE);
 				byte[] loadedData = storage.loadSectionRelatedObject(sectionDataId);
-				RawCubes data = (loadedData == null ? new UniformCubes((byte)0) : Cubes.createFromCompressedData(GeometryConstants.SECTION_CLUSTER_SIZE, loadedData)).convertToRawCubes(GeometryConstants.SECTION_CLUSTER_SIZE);
+				RawCubes data = (loadedData == null ? new UniformCubes((byte)0) : Cubes.createFromCompressedData(loadedData)).convertToRawCubes();
 				byte[] cubes = data.getCubes();
 				for (int y = 0; y < 16; y++) {
 					int sourceBaseY = y * 16 * 16;
@@ -225,7 +225,7 @@ public final class TestRegionImporter {
 				}
 				
 				// compress section data and send it to storage
-				byte[] compressedCubes = Cubes.createFromCubes(GeometryConstants.SECTION_CLUSTER_SIZE, cubes).compressToByteArray(GeometryConstants.SECTION_CLUSTER_SIZE);
+				byte[] compressedCubes = Cubes.createFromCubes(cubes).compressToByteArray();
 				storage.saveSectionRelatedObject(sectionDataId, compressedCubes);
 				
 			}

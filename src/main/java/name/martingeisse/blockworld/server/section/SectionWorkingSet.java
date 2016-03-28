@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import name.martingeisse.blockworld.common.cubes.Cubes;
 import name.martingeisse.blockworld.common.cubes.UniformCubes;
-import name.martingeisse.blockworld.common.geometry.GeometryConstants;
 import name.martingeisse.blockworld.common.protocol.SectionDataId;
 import name.martingeisse.blockworld.server.section.entry.InteractiveSectionImageCacheEntry;
 import name.martingeisse.blockworld.server.section.entry.SectionCubesCacheEntry;
@@ -273,7 +272,7 @@ public final class SectionWorkingSet {
 		switch (sectionDataId.getType()) {
 
 		case DEFINITIVE: {
-			final Cubes sectionCubes = Cubes.createFromCompressedData(GeometryConstants.SECTION_CLUSTER_SIZE, data);
+			final Cubes sectionCubes = Cubes.createFromCompressedData(data);
 			return new SectionCubesCacheEntry(this, sectionDataId, sectionCubes);
 		}
 

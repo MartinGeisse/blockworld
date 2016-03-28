@@ -9,7 +9,6 @@ package name.martingeisse.blockworld.common.cubes;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import name.martingeisse.blockworld.common.geometry.ClusterSize;
 import name.martingeisse.blockworld.common.geometry.GeometryConstants;
 import name.martingeisse.blockworld.geometry.ReadableVector3i;
 
@@ -36,37 +35,32 @@ public abstract class Cubes {
 	 * Serializes and compresses this cubes object, writing compressed data to the
 	 * specified stream (including the compression scheme code).
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param stream the stream to write compressed data to
 	 * @throws IOException on I/O errors
 	 */
-	public final void compressToStream(final ClusterSize clusterSize, final OutputStream stream) throws IOException {
-		if (clusterSize == null) {
-			throw new IllegalArgumentException("clusterSize argument cannot be null");
-		}
+	public final void compressToStream(final OutputStream stream) throws IOException {
 		if (stream == null) {
 			throw new IllegalArgumentException("stream argument cannot be null");
 		}
-		compressToStreamInternal(clusterSize, stream);
+		compressToStreamInternal(stream);
 	}
 
 	/**
-	 * Implementation for {@link #compressToStream(ClusterSize, OutputStream)}.
+	 * Implementation for {@link #compressToStream(OutputStream)}.
 	 * @throws IOException on I/O errors
 	 */
-	protected abstract void compressToStreamInternal(ClusterSize clusterSize, OutputStream stream) throws IOException;
+	protected abstract void compressToStreamInternal(OutputStream stream) throws IOException;
 
 	/**
 	 * Serializes and compresses this cubes object, writing compressed data to a
 	 * new byte array (including the compression scheme code).
 	 * 
-	 * @param clusterSize the cluster size
 	 * @return the compressed data
 	 */
-	public final byte[] compressToByteArray(final ClusterSize clusterSize) {
+	public final byte[] compressToByteArray() {
 		try {
 			final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			compressToStream(clusterSize, byteArrayOutputStream);
+			compressToStream(byteArrayOutputStream);
 			return byteArrayOutputStream.toByteArray();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -76,14 +70,10 @@ public abstract class Cubes {
 	/**
 	 * Creates a cubes instance from compressed data.
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param compressedData the compressed data
 	 * @return the cubes object
 	 */
-	public static Cubes createFromCompressedData(final ClusterSize clusterSize, final byte[] compressedData) {
-		if (clusterSize == null) {
-			throw new IllegalArgumentException("clusterSize argument cannot be null");
-		}
+	public static Cubes createFromCompressedData(final byte[] compressedData) {
 		if (compressedData == null) {
 			throw new IllegalArgumentException("compressedData argument cannot be null");
 		}
@@ -91,10 +81,10 @@ public abstract class Cubes {
 		switch (compressionSchemeCode) {
 
 		case 0:
-			return UniformCubes.decompress(clusterSize, compressedData);
+			return UniformCubes.decompress(compressedData);
 
 		case 1:
-			return RawCubes.decompress(clusterSize, compressedData);
+			return RawCubes.decompress(compressedData);
 
 		default:
 			throw new RuntimeException("unknown compression scheme code: " + compressionSchemeCode);
@@ -110,19 +100,15 @@ public abstract class Cubes {
 	 * TODO use {@link GeometryConstants#SECTION_CLUSTER_SIZE} by default -- no need to pass
 	 * it around everywhere as if this was a framework
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param cubes the raw cubes
 	 * @return the cubes object
 	 */
-	public static Cubes createFromCubes(final ClusterSize clusterSize, final byte[] cubes) {
-		if (clusterSize == null) {
-			throw new IllegalArgumentException("clusterSize argument cannot be null");
-		}
+	public static Cubes createFromCubes(final byte[] cubes) {
 		if (cubes == null) {
 			throw new IllegalArgumentException("cubes argument cannot be null");
 		}
-		if (cubes.length != clusterSize.getCellCount()) {
-			throw new IllegalArgumentException("the specified cube data has wrong size " + cubes.length + " (should be " + clusterSize.getCellCount() + ")");
+		if (cubes.length != GeometryConstants.SECTION_CLUSTER_SIZE.getCellCount()) {
+			throw new IllegalArgumentException("the specified cube data has wrong size " + cubes.length + " (should be " + GeometryConstants.SECTION_CLUSTER_SIZE.getCellCount() + ")");
 		}
 		final UniformCubes uniformCubes = UniformCubes.tryBuild(cubes);
 		if (uniformCubes != null) {
@@ -140,23 +126,21 @@ public abstract class Cubes {
 	/**
 	 * Returns the cube value for the specified relative position.
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param x the x position
 	 * @param y the y position
 	 * @param z the z position
 	 * @return the cube value
 	 */
-	public abstract byte getCubeRelative(final ClusterSize clusterSize, final int x, final int y, final int z);
+	public abstract byte getCubeRelative(final int x, final int y, final int z);
 
 	/**
 	 * Returns the cube value for the specified relative position.
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param position the position
 	 * @return the cube value
 	 */
-	public final byte getCubeRelative(final ClusterSize clusterSize, final ReadableVector3i position) {
-		return getCubeRelative(clusterSize, position.getX(), position.getY(), position.getZ());
+	public final byte getCubeRelative(final ReadableVector3i position) {
+		return getCubeRelative(position.getX(), position.getY(), position.getZ());
 	}
 	
 	/**
@@ -166,14 +150,13 @@ public abstract class Cubes {
 	 * instance to use after the modification (which is this object if it was able to handle the
 	 * modification in-place).
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param x the x position
 	 * @param y the y position
 	 * @param z the z position
 	 * @param value the cube value to set
 	 * @return the cubes object to use after the modification
 	 */
-	public abstract Cubes setCubeRelative(final ClusterSize clusterSize, final int x, final int y, final int z, final byte value);
+	public abstract Cubes setCubeRelative(final int x, final int y, final int z, final byte value);
 	
 	/**
 	 * Sets the cube value for the specified relative position. This method may fail to update
@@ -182,23 +165,21 @@ public abstract class Cubes {
 	 * instance to use after the modification (which is this object if it was able to handle the
 	 * modification in-place).
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param position the position
 	 * @param value the cube value to set
 	 * @return the cubes object to use after the modification
 	 */
-	public final Cubes setCubeRelative(final ClusterSize clusterSize, final ReadableVector3i position, final byte value) {
-		return setCubeRelative(clusterSize, position.getX(), position.getY(), position.getZ(), value);
+	public final Cubes setCubeRelative(final ReadableVector3i position, final byte value) {
+		return setCubeRelative(position.getX(), position.getY(), position.getZ(), value);
 	}
 
 	/**
 	 * Creates a new {@link RawCubes} from the data in this object, or returns
 	 * this if it already is an instance of that class.
 	 * 
-	 * @param clusterSize the cluster size
 	 * @return the {@link RawCubes} object.
 	 */
-	public abstract RawCubes convertToRawCubes(ClusterSize clusterSize);
+	public abstract RawCubes convertToRawCubes();
 	
 	// override
 	@Override

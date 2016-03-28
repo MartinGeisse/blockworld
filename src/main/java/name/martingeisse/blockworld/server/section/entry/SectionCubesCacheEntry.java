@@ -63,7 +63,7 @@ public final class SectionCubesCacheEntry extends SectionDataCacheEntry {
 	// override
 	@Override
 	protected byte[] serializeForSave() {
-		return sectionCubes.compressToByteArray(GeometryConstants.SECTION_CLUSTER_SIZE);
+		return sectionCubes.compressToByteArray();
 	}
 
 	/**
@@ -87,7 +87,7 @@ public final class SectionCubesCacheEntry extends SectionDataCacheEntry {
 	 * @return the cube value
 	 */
 	public final byte getCubeRelative(final int x, final int y, final int z) {
-		return sectionCubes.getCubeRelative(GeometryConstants.SECTION_CLUSTER_SIZE, x, y, z);
+		return sectionCubes.getCubeRelative(x, y, z);
 	}
 
 	/**
@@ -111,7 +111,7 @@ public final class SectionCubesCacheEntry extends SectionDataCacheEntry {
 	 * @param value the cube value to set
 	 */
 	public final void setCubeRelative(final int x, final int y, final int z, final byte value) {
-		this.sectionCubes = sectionCubes.setCubeRelative(GeometryConstants.SECTION_CLUSTER_SIZE, x, y, z, value);
+		this.sectionCubes = sectionCubes.setCubeRelative(x, y, z, value);
 		markCubeModifiedRelative(x, y, z);
 	}
 

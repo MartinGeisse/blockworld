@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
-import name.martingeisse.blockworld.common.geometry.ClusterSize;
+import name.martingeisse.blockworld.common.geometry.GeometryConstants;
 import name.martingeisse.blockworld.common.util.CompressionUtil;
 
 /**
@@ -61,7 +61,7 @@ public class RawCubes extends Cubes {
 	
 	// override
 	@Override
-	protected void compressToStreamInternal(final ClusterSize clusterSize, final OutputStream stream) throws IOException {
+	protected void compressToStreamInternal(final OutputStream stream) throws IOException {
 		
 		// TODO try uniform
 		// write cubes
@@ -74,11 +74,10 @@ public class RawCubes extends Cubes {
 	 * Decompresses and deserializes an object of this type from the specified array,
 	 * skipping the first byte since it is assumed to contain the compression scheme.
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param compressedData the compressed data
 	 * @return the cubes object, or null if not successful
 	 */
-	public static RawCubes decompress(final ClusterSize clusterSize, final byte[] compressedData) {
+	public static RawCubes decompress(final byte[] compressedData) {
 		final byte[] deflatedCubes = ArrayUtils.subarray(compressedData, 1, compressedData.length);
 		final byte[] cubes = CompressionUtil.inflate(deflatedCubes, COMPRESSION_DICTIONARY);
 		return new RawCubes(cubes);
@@ -96,12 +95,11 @@ public class RawCubes extends Cubes {
 
 	/**
 	 * Builds an instance of this type, filled uniformly with a single cube type.
-	 * @param clusterSize the cluster size
 	 * @param cubeType the cube type to fill the returned object with
 	 * @return the cubes object
 	 */
-	public static RawCubes buildUniform(final ClusterSize clusterSize, final byte cubeType) {
-		final byte[] cubes = new byte[clusterSize.getCellCount()];
+	public static RawCubes buildUniform(final byte cubeType) {
+		final byte[] cubes = new byte[GeometryConstants.SECTION_CLUSTER_SIZE.getCellCount()];
 		Arrays.fill(cubes, cubeType);
 		return new RawCubes(cubes);
 	}
@@ -137,22 +135,22 @@ public class RawCubes extends Cubes {
 
 	// override
 	@Override
-	public byte getCubeRelative(final ClusterSize clusterSize, final int x, final int y, final int z) {
-		return cubes[getRelativeCubeIndex(clusterSize, x, y, z)];
+	public byte getCubeRelative(final int x, final int y, final int z) {
+		return cubes[getRelativeCubeIndex(x, y, z)];
 	}
 
 	// override
 	@Override
-	public Cubes setCubeRelative(final ClusterSize clusterSize, final int x, final int y, final int z, final byte value) {
-		cubes[getRelativeCubeIndex(clusterSize, x, y, z)] = value;
+	public Cubes setCubeRelative(final int x, final int y, final int z, final byte value) {
+		cubes[getRelativeCubeIndex(x, y, z)] = value;
 		return this;
 	}
 
 	/**
 	 * 
 	 */
-	final int getRelativeCubeIndex(final ClusterSize clusterSize, final int x, final int y, final int z) {
-		final int size = clusterSize.getSize();
+	final int getRelativeCubeIndex(final int x, final int y, final int z) {
+		final int size = GeometryConstants.SECTION_SIZE;
 		if (x < 0 || y < 0 || z < 0 || x >= size || y >= size || z >= size) {
 			throw new IndexOutOfBoundsException();
 		}
@@ -161,7 +159,7 @@ public class RawCubes extends Cubes {
 
 	// override
 	@Override
-	public RawCubes convertToRawCubes(ClusterSize clusterSize) {
+	public RawCubes convertToRawCubes() {
 		return this;
 	}
 

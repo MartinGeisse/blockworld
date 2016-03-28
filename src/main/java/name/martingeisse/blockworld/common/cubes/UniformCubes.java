@@ -8,7 +8,6 @@ package name.martingeisse.blockworld.common.cubes;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import name.martingeisse.blockworld.common.geometry.ClusterSize;
 
 /**
  * Cubes object that is filled uniformly with a single cube type. Only the cube
@@ -40,7 +39,7 @@ public final class UniformCubes extends Cubes {
 
 	// override
 	@Override
-	protected void compressToStreamInternal(final ClusterSize clusterSize, final OutputStream stream) throws IOException {
+	protected void compressToStreamInternal(final OutputStream stream) throws IOException {
 		// do not write anything if cubeType is 0 because "uniform" and "type 0" are implicit
 		if (cubeType != 0) {
 			stream.write(0);
@@ -52,11 +51,10 @@ public final class UniformCubes extends Cubes {
 	 * Decompresses and deserializes an object of this type from the specified array,
 	 * skipping the first byte since it is assumed to contain the compression scheme.
 	 * 
-	 * @param clusterSize the cluster size
 	 * @param compressedData the compressed data
 	 * @return the cubes object, or null if not successful
 	 */
-	public static UniformCubes decompress(final ClusterSize clusterSize, final byte[] compressedData) {
+	public static UniformCubes decompress(final byte[] compressedData) {
 		if (compressedData.length < 2) {
 			return new UniformCubes((byte)0);
 		} else {
@@ -98,24 +96,24 @@ public final class UniformCubes extends Cubes {
 
 	// override
 	@Override
-	public byte getCubeRelative(final ClusterSize clusterSize, final int x, final int y, final int z) {
+	public byte getCubeRelative(final int x, final int y, final int z) {
 		return cubeType;
 	}
 
 	// override
 	@Override
-	public Cubes setCubeRelative(final ClusterSize clusterSize, final int x, final int y, final int z, final byte value) {
+	public Cubes setCubeRelative(final int x, final int y, final int z, final byte value) {
 		if (value == cubeType) {
 			return this;
 		}
-		final RawCubes newData = RawCubes.buildUniform(clusterSize, cubeType);
-		return newData.setCubeRelative(clusterSize, x, y, z, value);
+		final RawCubes newData = RawCubes.buildUniform(cubeType);
+		return newData.setCubeRelative(x, y, z, value);
 	}
 
 	// override
 	@Override
-	public RawCubes convertToRawCubes(final ClusterSize clusterSize) {
-		return RawCubes.buildUniform(clusterSize, cubeType);
+	public RawCubes convertToRawCubes() {
+		return RawCubes.buildUniform(cubeType);
 	}
 
 	// override

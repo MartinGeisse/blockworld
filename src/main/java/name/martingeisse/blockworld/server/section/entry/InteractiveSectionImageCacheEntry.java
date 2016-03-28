@@ -70,20 +70,20 @@ public final class InteractiveSectionImageCacheEntry extends SectionDataCacheEnt
 								SectionDataId neighborCubeDataId = cubeDataId.getNeighbor(direction);
 								SectionCubesCacheEntry neighborEntry = (SectionCubesCacheEntry)workingSet.get(neighborCubeDataId);
 								Cubes neighborCubes = neighborEntry.getSectionCubes();
-								neighborCubeType = MinerCubeTypes.CUBE_TYPES[neighborCubes.getCubeRelative(clusterSize, x2, y2, z2) & 0xff];
+								neighborCubeType = MinerCubeTypes.CUBE_TYPES[neighborCubes.getCubeRelative(x2, y2, z2) & 0xff];
 							} else {
-								neighborCubeType = MinerCubeTypes.CUBE_TYPES[originalCubes.getCubeRelative(clusterSize, x2, y2, z2) & 0xff];
+								neighborCubeType = MinerCubeTypes.CUBE_TYPES[originalCubes.getCubeRelative(x2, y2, z2) & 0xff];
 							}
 							AxisAlignedDirection directionTowardsOriginal = direction.getOpposite();
 							if (!neighborCubeType.obscuresNeighbor(directionTowardsOriginal) || !neighborCubeType.blocksMovementToNeighbor(directionTowardsOriginal)) {
 								continue zloop;
 							}
 						}
-						clonedCubes = clonedCubes.setCubeRelative(clusterSize, x, y, z, (byte)255);
+						clonedCubes = clonedCubes.setCubeRelative(x, y, z, (byte)255);
 					}
 				}
 			}
-			this.imageData = clonedCubes.compressToByteArray(GeometryConstants.SECTION_CLUSTER_SIZE);
+			this.imageData = clonedCubes.compressToByteArray();
 			markModified();
 		}
 		return imageData;

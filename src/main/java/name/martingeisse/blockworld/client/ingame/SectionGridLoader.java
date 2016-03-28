@@ -194,7 +194,7 @@ public final class SectionGridLoader {
 		}
 		final SectionId sectionId = sectionDataId.getSectionId();
 		logger.debug("received interactive section image for section " + sectionId);
-		final Cubes cubes = Cubes.createFromCompressedData(workingSet.getClusterSize(), message.getData());
+		final Cubes cubes = Cubes.createFromCompressedData(message.getData());
 		logger.debug("created Cubes instance for section " + sectionId);
 		
 		// add a renderable section
@@ -216,7 +216,7 @@ public final class SectionGridLoader {
 					for (int x=0; x<size; x++) {
 						for (int y=0; y<size; y++) {
 							for (int z=0; z<size; z++) {
-								colliderCubes[x * size * size + y * size + z] = cubes.getCubeRelative(clusterSize, x, y, z);
+								colliderCubes[x * size * size + y * size + z] = cubes.getCubeRelative(x, y, z);
 							}
 						}
 					}
