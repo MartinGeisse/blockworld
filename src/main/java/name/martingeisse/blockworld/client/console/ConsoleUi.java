@@ -32,20 +32,10 @@ import name.martingeisse.blockworld.client.util.resource.Font;
 /**
  * Renders the {@link Console} by submitting OpenGL work units
  * and forwards LWJGL keyboard events to the console.
- *
- * TODO these concerns should really be separated, but first
- * we need to separate them at the lower levels because LWJGL
- * already conflates them.
- *
- * TODO the visibility logic should be moved out of here. The
- * meaning of consumeKeyboardEvents() becomes too complicated
- * when it's here.
  */
-public final class ConsoleRenderer {
+public final class ConsoleUi {
 
 	private final Console console;
-	private boolean visible;
-	private boolean previouslyVisible;
 
 	/**
 	 * the glWorkUnit
@@ -119,27 +109,15 @@ public final class ConsoleRenderer {
 	 * @param console the console
 	 */
 	@Inject
-	public ConsoleRenderer(final Console console) {
+	public ConsoleUi(final Console console) {
 		this.console = console;
-		this.visible = false;
-		this.previouslyVisible = false;
-	}
-
-	/**
-	 * Getter method for the visible.
-	 * @return the visible
-	 */
-	public boolean isVisible() {
-		return visible;
 	}
 
 	/**
 	 * Draws the console.
 	 */
 	public void draw() {
-		if (visible) {
-			GlWorkerLoop.getInstance().schedule(glWorkUnit);
-		}
+		GlWorkerLoop.getInstance().schedule(glWorkUnit);
 	}
 
 	/**
@@ -149,23 +127,15 @@ public final class ConsoleRenderer {
 	 * have no effect.
 	 */
 	public void consumeKeyboardEvents() {
-		// TODO KEY_SECTION only makes sense on a German Mac keyboard
-		if (Keyboard.isKeyDown(Keyboard.KEY_SECTION)) {
-			if (visible == previouslyVisible) {
-				visible = !visible;
-			}
-		} else {
-			previouslyVisible = visible;
-		}
 		while (Keyboard.next()) {
-			if (visible && Keyboard.getEventKeyState()) {
+			if (Keyboard.getEventKeyState()) {
 				final char c = Keyboard.getEventCharacter();
 				if (c == '\n' || c == '\r') {
 					console.consumeInputCharacter('\n');
 				} else if (c >= 32) {
 					console.consumeInputCharacter(c);
 				}
-			} // else: consume characters anyway
+			}
 		}
 	}
 

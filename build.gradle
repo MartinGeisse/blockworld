@@ -46,16 +46,5 @@ dependencies {
 	compile 'slick:slick:20121001-264'
 	compile 'com.googlecode.soundlibs:jorbis:0.0.17-2'
 
-	// TODO
-	// name.martingeisse:common:0.1-SNAPSHOT
-	// name.martingeisse:json:0.1-SNAPSHOT
-	// name.martingeisse:httpclient:0.1-SNAPSHOT
-	// name.martingeisse:jetty:0.1-SNAPSHOT
-	// name.martingeisse:sql:0.1-SNAPSHOT
-	// name.martingeisse:sql-servlet:0.1-SNAPSHOT
-	// name.martingeisse:http-api-server:0.1-SNAPSHOT
-	// com.datastax.cassandra:cassandra-driver-core:2.1.2
-	// io.netty:netty:3.6.5.Final
-
 }
 

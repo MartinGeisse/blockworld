@@ -13,7 +13,7 @@ import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import name.martingeisse.blockworld.client.console.Console;
 import name.martingeisse.blockworld.client.console.ConsoleCommandHandler;
-import name.martingeisse.blockworld.client.console.ConsoleRenderer;
+import name.martingeisse.blockworld.client.console.ConsoleUi;
 import name.martingeisse.blockworld.client.console.DefaultConsoleCommandHandler;
 import name.martingeisse.blockworld.client.gui.startmenu.StartmenuFrameHandler;
 import name.martingeisse.blockworld.client.gui.startmenu.viewmodel.DummyViewModel;
@@ -84,7 +84,7 @@ public class Main extends AbstractModule {
 		bind(StartmenuFrameHandler.class).in(Singleton.class);
 		bind(ViewModel.class).to(DummyViewModel.class).in(Singleton.class);
 		bind(IngameFrameHandler.class).in(Singleton.class);
-		bind(ConsoleRenderer.class).in(Singleton.class);
+		bind(ConsoleUi.class).in(Singleton.class);
 		bind(Console.class).in(Singleton.class);
 		bind(ConsoleCommandHandler.class).to(DefaultConsoleCommandHandler.class).in(Singleton.class);
 		

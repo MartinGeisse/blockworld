@@ -62,7 +62,7 @@ import org.lwjgl.opengl.GL11;
 import com.google.inject.Inject;
 import name.martingeisse.blockworld.client.assets.MinerResources;
 import name.martingeisse.blockworld.client.console.Console;
-import name.martingeisse.blockworld.client.console.ConsoleRenderer;
+import name.martingeisse.blockworld.client.console.ConsoleUi;
 import name.martingeisse.blockworld.client.engine.EngineParameters;
 import name.martingeisse.blockworld.client.engine.FrameRenderParameters;
 import name.martingeisse.blockworld.client.engine.WorldWorkingSet;
@@ -122,7 +122,7 @@ public class IngameFrameHandler implements FrameHandler {
 
 	private final Hud hud;
 	private final SelectedCubePanel selectedCubePanel;
-	private final ConsoleRenderer consoleRenderer;
+	private final ConsoleUi consoleUi;
 	private final Console console;
 	private final IntervalInvoker sendPlayerPositionInvoker;
 	private final ClientToServerTransmitter clientToServerTransmitter;
@@ -141,7 +141,6 @@ public class IngameFrameHandler implements FrameHandler {
 	private boolean grid;
 	private byte currentCubeType = 1;
 	private List<PlayerProxy> playerProxies;
-	private boolean minusPressed;
 	private RegularSound footstepSound;
 	private boolean walking;
 	private long cooldownFinishTime;
@@ -151,36 +150,39 @@ public class IngameFrameHandler implements FrameHandler {
 	private IntervalInvoker sectionLoadHandler;
 	private long coins;
 	private SectionGridLoader sectionGridLoader;
+	private boolean consoleVisible;
+	private boolean consolePreviouslyVisible;
 
 	/**
 	 * Constructor.
 	 * @param hud (injected)
 	 * @param selectedCubePanel (injected)
-	 * @param consoleRenderer (injected)
+	 * @param consoleUi (injected)
 	 * @param clientToServerTransmitter (injected)
 	 * @param serverToClientReceiver (injected)
 	 * @param flashMessagePanel (injected)
 	 * @param console (injected)
 	 */
 	@Inject
-	public IngameFrameHandler(final Hud hud, final SelectedCubePanel selectedCubePanel, final ConsoleRenderer consoleRenderer, final ClientToServerTransmitter clientToServerTransmitter, ServerToClientReceiver serverToClientReceiver, FlashMessagePanel flashMessagePanel, Console console) {
+	public IngameFrameHandler(final Hud hud, final SelectedCubePanel selectedCubePanel, final ConsoleUi consoleUi, final ClientToServerTransmitter clientToServerTransmitter, final ServerToClientReceiver serverToClientReceiver, final FlashMessagePanel flashMessagePanel, final Console console) {
 		this.hud = hud;
 		this.selectedCubePanel = selectedCubePanel;
-		this.consoleRenderer = consoleRenderer;
+		this.consoleUi = consoleUi;
 		this.console = console;
 		this.clientToServerTransmitter = clientToServerTransmitter;
 		this.serverToClientReceiver = serverToClientReceiver;
 		this.flashMessagePanel = flashMessagePanel;
 		this.sendPlayerPositionInvoker = new IntervalInvoker(200, () -> {
-			MutableVector3d mutablePosition = player.getPosition();
-			Vector3d position = new Vector3d(mutablePosition.x, mutablePosition.y, mutablePosition.z);
-			MutableEulerAngles mutableOrientation = player.getOrientation();
-			EulerAngles orientation = new EulerAngles(mutableOrientation.getHorizontalAngle(), mutableOrientation.getVerticalAngle(), mutableOrientation.getRollAngle());
+			final MutableVector3d mutablePosition = player.getPosition();
+			final Vector3d position = new Vector3d(mutablePosition.x, mutablePosition.y, mutablePosition.z);
+			final MutableEulerAngles mutableOrientation = player.getOrientation();
+			final EulerAngles orientation = new EulerAngles(mutableOrientation.getHorizontalAngle(), mutableOrientation.getVerticalAngle(), mutableOrientation.getRollAngle());
 			clientToServerTransmitter.transmit(new UpdatePositionMessage(position, orientation));
 		});
 		this.menuFrameHandler = new GuiFrameHandler() {
+
 			@Override
-			protected void configureGui(Gui gui) {
+			protected void configureGui(final Gui gui) {
 				gui.setDefaultFont(MinerResources.getInstance().getFont());
 				gui.setRootElement(new MainMenuPage() {
 
@@ -195,10 +197,12 @@ public class IngameFrameHandler implements FrameHandler {
 					protected void quitGame() {
 						closeRequested = true;
 					}
-					
+
 				});
 			}
 		};
+		this.consoleVisible = false;
+		this.consolePreviouslyVisible = false;
 
 		/**
 		 * The sectionLoadHandler -- checks often (100 ms), but doesn't re-request frequently (5 sec)
@@ -251,34 +255,34 @@ public class IngameFrameHandler implements FrameHandler {
 		sectionGridLoader = new SectionGridLoader(workingSet, clientToServerTransmitter, 3, 2);
 
 	}
-	
+
 	/**
 	 * Resumes a character using the specified token.
-	 * 
+	 *
 	 * @param playCharacterToken the token
 	 */
-	public void resumePlayer(String playCharacterToken) {
+	public void resumePlayer(final String playCharacterToken) {
 		clientToServerTransmitter.transmit(new ResumeCharacterMessage(playCharacterToken));
 	}
 
 	// override
 	@Override
 	public void step() throws BreakFrameLoopException {
-		
+
 		// handle quitting the game
 		if (Display.isCloseRequested() || Keyboard.isKeyDown(Keyboard.KEY_F10) || closeRequested) {
 			clientToServerTransmitter.disconnect();
 			throw new BreakFrameLoopException();
 		}
-		
+
 		// handle network messages
 		while (true) {
-			ServerToClientMessage message = serverToClientReceiver.poll();
+			final ServerToClientMessage message = serverToClientReceiver.poll();
 			if (message == null) {
 				break;
 			}
 			if (message instanceof CharacterResumedMessage) {
-				CharacterResumedMessage typedMessage = (CharacterResumedMessage)message;
+				final CharacterResumedMessage typedMessage = (CharacterResumedMessage)message;
 				player.getPosition().copyFrom(typedMessage.getPosition());
 				player.getOrientation().copyFrom(typedMessage.getOrientation());
 				sectionGridLoader.setViewerPosition(player.getSectionId());
@@ -288,8 +292,8 @@ public class IngameFrameHandler implements FrameHandler {
 				sectionGridLoader.handleModificationEventPacket((SingleSectionModificationMessage)message);
 			} else if (message instanceof OtherCharactersUpdateMessage) {
 				playerProxies = new ArrayList<>();
-				for (OtherCharactersUpdateMessage.Entry entry : ((OtherCharactersUpdateMessage)message).getEntries()) {
-					PlayerProxy playerProxy = new PlayerProxy(entry.getName());
+				for (final OtherCharactersUpdateMessage.Entry entry : ((OtherCharactersUpdateMessage)message).getEntries()) {
+					final PlayerProxy playerProxy = new PlayerProxy(entry.getName());
 					playerProxy.getPosition().copyFrom(entry.getPosition());
 					playerProxy.getOrientation().copyFrom(entry.getOrientation());
 					playerProxies.add(playerProxy);
@@ -299,26 +303,44 @@ public class IngameFrameHandler implements FrameHandler {
 			} else if (message instanceof UpdateCoinsMessage) {
 				coins = ((UpdateCoinsMessage)message).getCoins();
 			} else if (message instanceof ConsoleOutputMessage) {
-				for (String line : ((ConsoleOutputMessage)message).getLines()) {
+				for (final String line : ((ConsoleOutputMessage)message).getLines()) {
 					console.println(line);
 				}
 			} else {
 				logger.error("unknown message: " + message);
 			}
 		}
-		
+
 		if (menuActive) {
+			
 			// TODO properly disable all keyboard / mouse handling in the CubeWorldHandler when the GUI is active
 			menuFrameHandler.step();
-		} else if (consoleRenderer.isVisible()) {
-			consoleRenderer.consumeKeyboardEvents();
+			
 		} else {
-			while (Keyboard.next()) {
-				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE && Keyboard.getEventKeyState()) {
-					menuActive = true;
-					MouseUtil.ungrab();
-				}
+			
+			// handle menu key
+			if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+				menuActive = true;
+				MouseUtil.ungrab();
 			}
+			
+			// handle console visibility
+			// TODO KEY_SECTION only makes sense on a German Mac keyboard
+			if (Keyboard.isKeyDown(Keyboard.KEY_SECTION)) {
+				if (consoleVisible == consolePreviouslyVisible) {
+					consoleVisible = !consoleVisible;
+				}
+			} else {
+				consolePreviouslyVisible = consoleVisible;
+			}
+
+			// redirect input to the console if it is visible, otherwise drop them
+			if (consoleVisible) {
+				consoleUi.consumeKeyboardEvents();
+			} else {
+				while (Keyboard.next());
+			}
+			
 		}
 
 		// first, handle the stuff that already works without the world being loaded "enough"
@@ -348,7 +370,6 @@ public class IngameFrameHandler implements FrameHandler {
 		if (!menuActive && Keyboard.isKeyDown(Keyboard.KEY_L)) {
 			MouseUtil.grab();
 		}
-		minusPressed = !menuActive && Keyboard.isKeyDown(Keyboard.KEY_SLASH);
 		wireframe = !menuActive && Keyboard.isKeyDown(Keyboard.KEY_F);
 		player.setWantsToJump(!menuActive && Keyboard.isKeyDown(Keyboard.KEY_SPACE));
 		if (!menuActive && Keyboard.isKeyDown(Keyboard.KEY_1)) {
@@ -621,12 +642,9 @@ public class IngameFrameHandler implements FrameHandler {
 				glBindTexture(GL_TEXTURE_2D, 0);
 				glEnable(GL_BLEND);
 				glMatrixMode(GL_MODELVIEW);
-				//				for (final PlayerProxy playerProxy : playerProxies) {
-				//					// TODO avoid drawing the player itself
-				//					if (playerProxy.getId() != IngameHandler.protocolClient.getSessionId()) {
-				//						otherPlayerVisualTemplate.renderEmbedded(playerProxy);
-				//					}
-				//				}
+				for (final PlayerProxy playerProxy : playerProxies) {
+					otherPlayerVisualTemplate.renderEmbedded(playerProxy);
+				}
 				glDisable(GL_BLEND);
 
 				// draw the crosshair
@@ -669,11 +687,13 @@ public class IngameFrameHandler implements FrameHandler {
 		hud.draw();
 
 		// draw the console
-		consoleRenderer.draw();
-		
+		if (consoleVisible) {
+			consoleUi.draw();
+		}
+
 		// draw the menu
 		if (menuActive) {
-			menuFrameHandler.draw();		
+			menuFrameHandler.draw();
 		}
 
 	}

@@ -23,6 +23,7 @@ public class ClientLauncher implements Runnable {
 	 */
 	private static Logger logger = Logger.getLogger(ClientLauncher.class);
 
+	@SuppressWarnings("unused")
 	private final StartmenuFrameHandler startmenuFrameHandler;
 	private final IngameFrameHandler ingameFrameHandler;
 
