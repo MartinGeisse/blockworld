@@ -99,7 +99,9 @@ public class OpenglLauncher implements Runnable {
 			GlWorkerLoop.getInstance().workAndWait();
 			logger.debug("OpenGL worker loop stopped!");
 			
+
 			logger.debug("cleaning up LWJGL...");
+			Display.processMessages();
 			Display.destroy();
 			AL.destroy();
 			logger.debug("LWJGL cleaned up");

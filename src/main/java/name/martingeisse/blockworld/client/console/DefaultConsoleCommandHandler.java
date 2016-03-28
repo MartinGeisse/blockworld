@@ -32,7 +32,6 @@ public class DefaultConsoleCommandHandler implements ConsoleCommandHandler {
 	@Override
 	public void handleCommand(final Console console, final String command, final String[] args) {
 		if (command.equals("quit")) {
-			GlWorkerLoop.getInstance().scheduleStop();
 			throw new BreakFrameLoopException();
 		} else if (command.equals("initworld") || command.equals("help") || command.equals("itemtypes") || command.equals("wish") || command.equals("equip") || command.equals("unequip") || command.equals("trash") || command.equals("give") || command.equals("inventory")) {
 			transmitter.transmit(new ConsoleCommandMessage(command, args));

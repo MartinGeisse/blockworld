@@ -8,6 +8,7 @@ package name.martingeisse.blockworld.common.util.task;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class manages execution of tasks.
@@ -34,7 +35,18 @@ public final class TaskSystem {
 	 */
 	public static void initialize() {
 	}
-	
+
+	/**
+	 * Shuts down the task system.
+	 */
+	public static void shutdown() {
+		executorService.shutdown();
+		try {
+			executorService.awaitTermination(1, TimeUnit.DAYS);
+		} catch (InterruptedException e) {
+		}
+	}
+
 	/**
 	 * Getter method for the executorService.
 	 * @return the executorService

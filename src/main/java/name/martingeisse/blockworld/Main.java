@@ -64,6 +64,7 @@ public class Main extends AbstractModule {
 		new Thread(injector.getInstance(ClientLauncher.class)).start();
 		new Thread(injector.getInstance(ServerLauncher.class)).start();
 		injector.getInstance(OpenglLauncher.class).run(); // OpenGL must run in the initial thread
+		TaskSystem.shutdown();
 	}
 
 	// override
