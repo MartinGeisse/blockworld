@@ -46,5 +46,8 @@ dependencies {
 	compile 'slick:slick:20121001-264'
 	compile 'com.googlecode.soundlibs:jorbis:0.0.17-2'
 
+	// Cassandra database
+	compile 'com.datastax.cassandra:cassandra-driver-core:3.0.0'
+
 }
 

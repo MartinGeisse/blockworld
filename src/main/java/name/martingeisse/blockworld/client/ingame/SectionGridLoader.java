@@ -263,6 +263,7 @@ public final class SectionGridLoader {
 			}
 		}
 		if (idsToRemoveOld != null) {
+			logger.debug("removing sections from working set: " + idsToRemoveOld);
 			map.keySet().removeAll(idsToRemoveOld);
 			return true;
 		} else {

@@ -44,7 +44,7 @@ public class ClientLauncher implements Runnable {
 	// override
 	@Override
 	public void run() {
-		logger.info("Client launcher started");
+		logger.debug("Client launcher started");
 
 		logger.trace("waiting for OpenGL worker loop to be initialized...");
 		GlWorkerLoop.waitUntilInitialized();

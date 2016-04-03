@@ -118,25 +118,26 @@ public final class MinerServer {
 	 * @throws Exception on errors
 	 */
 	public void initializeWorldUsingImporter() throws Exception {
-		logger.info("initializing world...");
+		logger.debug("initializing world...");
 		final TestRegionImporter importer = new TestRegionImporter(sectionWorkingSet.getStorage());
 		// importer.setTranslation(-15, -9, -72);
 		// importer.importRegions(new File("resource/fis/region"));
 		importer.importRegions(new File("resource/stoneless"));
 		sectionWorkingSet.clearCache();
-		logger.info("world initialized");
+		logger.debug("world initialized");
 	}
 
 	/**
 	 * Initializes the world using a Perlin noise based height field.
 	 */
 	public void initializeWorldWithHeightField() {
+		logger.debug("initializing world...");
 		final int horizontalRadius = 5;
 		final int verticalRadius = 5;
 		final TerrainGenerator terrainGenerator = new TerrainGenerator();
 		terrainGenerator.generate(sectionWorkingSet.getStorage(), new SectionId(-horizontalRadius, -verticalRadius, -horizontalRadius), new SectionId(horizontalRadius, verticalRadius, horizontalRadius));
 		sectionWorkingSet.clearCache();
-		logger.info("world initialized");
+		logger.debug("world initialized");
 	}
 
 	/**

@@ -32,7 +32,7 @@ public class OpenglLauncher implements Runnable {
 	// override
 	@Override
 	public void run() {
-		logger.info("OpenGL Launcher started");
+		logger.debug("OpenGL Launcher started");
 		final int screenWidth = 800;
 		final int screenHeight = 600;
 		final boolean fullscreen = false;

@@ -195,7 +195,7 @@ public final class GlWorkerLoop {
 			wantsToSkip = (workload >= frameSkipThreshold);
 			actuallySkipping = wantsToSkip;
 			if (actuallySkipping) {
-				logger.info("low-level skip frame");
+				logger.debug("low-level skip frame");
 			}
 		} else if (workUnit == BEGIN_SIDE_EFFECTS) {
 			actuallySkipping = false;

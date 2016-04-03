@@ -102,7 +102,6 @@ import name.martingeisse.blockworld.common.network.s2c_message.ServerToClientMes
 import name.martingeisse.blockworld.common.network.s2c_message.SingleSectionModificationMessage;
 import name.martingeisse.blockworld.common.network.s2c_message.UpdateCoinsMessage;
 import name.martingeisse.blockworld.common.util.IntervalInvoker;
-import name.martingeisse.blockworld.common.util.ProfilingHelper;
 import name.martingeisse.blockworld.geometry.EulerAngles;
 import name.martingeisse.blockworld.geometry.MutableEulerAngles;
 import name.martingeisse.blockworld.geometry.MutableVector3d;
@@ -523,7 +522,7 @@ public class IngameFrameHandler implements FrameHandler {
 			public void execute() {
 
 				// profiling
-				ProfilingHelper.start();
+				// ProfilingHelper.start();
 
 				// set up projection matrix
 				glMatrixMode(GL_PROJECTION);
@@ -670,7 +669,7 @@ public class IngameFrameHandler implements FrameHandler {
 				GL11.glPixelTransferf(GL11.GL_BLUE_BIAS, 0.0f);
 
 				// profiling
-				ProfilingHelper.checkRelevant("draw", 50);
+				// ProfilingHelper.checkRelevant("draw", 50);
 
 			}
 		});

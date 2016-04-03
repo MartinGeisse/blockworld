@@ -200,7 +200,7 @@ public final class WorldWorkingSet {
 					return unit1.getBackfaceCullingDirection().ordinal() - unit2.getBackfaceCullingDirection().ordinal();
 				}
 			});
-			logger.info("working set now has " + renderUnits.length + " render units");
+			logger.debug("working set now has " + renderUnits.length + " render units");
 		}
 		
 		// render

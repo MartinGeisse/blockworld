@@ -32,7 +32,7 @@ public final class DigUtil {
 	 * @param cubeType the cube type dug away
 	 */
 	public static void onCubeDugAway(MinerSession session, int x, int y, int z, byte cubeType) {
-		logger.info("dug cube: " + cubeType);
+		logger.debug("dug cube: " + cubeType);
 		
 		// check for ores
 		switch (cubeType) {
