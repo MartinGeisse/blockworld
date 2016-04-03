@@ -393,7 +393,7 @@ public class IngameFrameHandler implements FrameHandler {
 		if (!workingSet.hasAllRenderModels(player.getSectionId(), 1) || !workingSet.hasAllColliders(player.getSectionId(), 1)) {
 			final Instant now = new Instant();
 			if (new Duration(previousConnectionProblemInstant, now).getMillis() >= 1000) {
-				// logger.warn("connection problems");
+				logger.warn("connection problems");
 				previousConnectionProblemInstant = now;
 			}
 			return;
