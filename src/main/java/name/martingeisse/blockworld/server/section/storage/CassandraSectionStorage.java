@@ -10,8 +10,6 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import name.martingeisse.stackd.common.geometry.ClusterSize;
-import name.martingeisse.stackd.common.network.SectionDataId;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import com.datastax.driver.core.ResultSet;
@@ -19,6 +17,8 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.Clause;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.google.inject.Inject;
+import name.martingeisse.blockworld.common.protocol.SectionDataId;
 
 /**
  * This storage implementation stores sections in a Cassandra database.
@@ -31,9 +31,9 @@ public final class CassandraSectionStorage extends AbstractSectionStorage {
 	private static Logger logger = Logger.getLogger(CassandraSectionStorage.class);
 
 	/**
-	 * the cassandrasSession
+	 * the cassandraSession
 	 */
-	private Session cassandrasSession;
+	private Session cassandraSession;
 
 	/**
 	 * the tableName
@@ -42,22 +42,21 @@ public final class CassandraSectionStorage extends AbstractSectionStorage {
 
 	/**
 	 * Constructor.
-	 * @param clusterSize the cluster-size of sections
-	 * @param cassandrasSession the cassandra {@link Session} object used to access the database
-	 * @param tableName the name of the section table
+	 * @param cassandraSession the cassandra {@link Session} object used to access the database
 	 */
-	public CassandraSectionStorage(final ClusterSize clusterSize, final Session cassandrasSession, final String tableName) {
-		super(clusterSize);
-		this.cassandrasSession = cassandrasSession;
-		this.tableName = tableName;
+	@Inject
+	public CassandraSectionStorage(final Session cassandraSession) {
+		this.cassandraSession = cassandraSession;
+		this.tableName = "section_data";
 	}
 
+	
 	/**
-	 * Getter method for the cassandrasSession.
-	 * @return the cassandrasSession
+	 * Getter method for the cassandraSession.
+	 * @return the cassandraSession
 	 */
-	public Session getCassandrasSession() {
-		return cassandrasSession;
+	public Session getCassandraSession() {
+		return cassandraSession;
 	}
 
 	/**
@@ -72,7 +71,7 @@ public final class CassandraSectionStorage extends AbstractSectionStorage {
 	 * 
 	 */
 	private ResultSet fetch(final Clause clause) {
-		return cassandrasSession.execute(QueryBuilder.select().all().from(tableName).where(clause));
+		return cassandraSession.execute(QueryBuilder.select().all().from(tableName).where(clause));
 	}
 
 	/* (non-Javadoc)
@@ -136,7 +135,7 @@ public final class CassandraSectionStorage extends AbstractSectionStorage {
 	public void saveSectionRelatedObject(final SectionDataId sectionDataId, final byte[] data) {
 		try {
 			final String rowId = sectionDataId.getIdentifierText();
-			cassandrasSession.execute(QueryBuilder.insertInto(tableName).value("id", rowId).value("data", ByteBuffer.wrap(data)));
+			cassandraSession.execute(QueryBuilder.insertInto(tableName).value("id", rowId).value("data", ByteBuffer.wrap(data)));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -149,7 +148,7 @@ public final class CassandraSectionStorage extends AbstractSectionStorage {
 	public void deleteSectionRelatedObject(final SectionDataId sectionDataId) {
 		try {
 			final Clause clause = QueryBuilder.eq("id", sectionDataId.getIdentifierText());
-			cassandrasSession.execute(QueryBuilder.delete().from(tableName).where(clause));
+			cassandraSession.execute(QueryBuilder.delete().from(tableName).where(clause));
 		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}

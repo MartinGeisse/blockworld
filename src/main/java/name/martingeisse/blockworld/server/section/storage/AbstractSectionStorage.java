@@ -13,14 +13,10 @@ import name.martingeisse.blockworld.common.protocol.SectionDataId;
 /**
  * Base class for section storage implementations that are responsible
  * for actually storing section-related objects.
+ * 
+ * TODO make this an interface!
  */
 public abstract class AbstractSectionStorage {
-
-	/**
-	 * Constructor.
-	 */
-	public AbstractSectionStorage() {
-	}
 
 	/**
 	 * Loads a single section-related object.

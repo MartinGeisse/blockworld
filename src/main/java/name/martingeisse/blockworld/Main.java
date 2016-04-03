@@ -6,6 +6,8 @@
 
 package name.martingeisse.blockworld;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -41,7 +43,7 @@ import name.martingeisse.blockworld.server.network.NetworkEventReceiver;
 import name.martingeisse.blockworld.server.network.ServerToClientTransmitter;
 import name.martingeisse.blockworld.server.section.SectionWorkingSet;
 import name.martingeisse.blockworld.server.section.storage.AbstractSectionStorage;
-import name.martingeisse.blockworld.server.section.storage.MemorySectionStorage;
+import name.martingeisse.blockworld.server.section.storage.CassandraSectionStorage;
 import name.martingeisse.blockworld.standalone.StandaloneClientToServerConnection;
 import name.martingeisse.blockworld.standalone.StandaloneClientToServerTransmitter;
 import name.martingeisse.blockworld.standalone.StandaloneServerNetworkEventReceiver;
@@ -108,6 +110,14 @@ public class Main extends AbstractModule {
 		bind(ServerLauncher.class).in(Singleton.class);
 		bind(ServerLoop.class).in(Singleton.class);
 		bind(MinerServer.class).in(Singleton.class);
+		bind(SectionToClientShipper.class).in(Singleton.class);
+		bind(ServerCommandHandler.class).to(DefaultServerCommandHandler.class).in(Singleton.class);
+		bind(SectionWorkingSet.class).in(Singleton.class);
+		
+		// section storage
+		// bind(AbstractSectionStorage.class).to(MemorySectionStorage.class).in(Singleton.class);
+		bind(AbstractSectionStorage.class).to(CassandraSectionStorage.class).in(Singleton.class);
+		bind(Session.class).toProvider(() -> Cluster.builder().addContactPoint("localhost").build().connect("miner"));
 		
 		// ------------------------------------------------------------------------------------
 		// standalone pseudo-networking
@@ -119,10 +129,6 @@ public class Main extends AbstractModule {
 		bind(StandaloneServerToClientConnection.class).in(Singleton.class);
 		bind(ServerToClientTransmitter.class).to(StandaloneServerToClientTransmitter.class).in(Singleton.class);
 		bind(ServerToClientReceiver.class).to(StandaloneServerToClientReceiver.class).in(Singleton.class);
-		bind(SectionToClientShipper.class).in(Singleton.class);
-		bind(ServerCommandHandler.class).to(DefaultServerCommandHandler.class).in(Singleton.class);
-		bind(SectionWorkingSet.class).in(Singleton.class);
-		bind(AbstractSectionStorage.class).to(MemorySectionStorage.class).in(Singleton.class);
 		
 	}
 
