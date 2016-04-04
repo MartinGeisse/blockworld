@@ -7,10 +7,12 @@
 package name.martingeisse.blockworld.client.ingame;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import name.martingeisse.blockworld.client.collision.AxisAlignedCollider;
 import name.martingeisse.blockworld.client.collision.CubeArrayClusterCollider;
 import name.martingeisse.blockworld.client.engine.CollidingSection;
@@ -133,43 +135,51 @@ public final class SectionGridLoader {
 		}
 		anythingUpdated |= restrictMapToRadius(workingSet.getCollidingSections(), colliderRadius + 1);
 		
-		// ProfilingHelper.checkRelevant("update sections 1");
-		
-		// detect missing section render models in the viewer's proximity, then request them all at once
-		// logger.trace("checking for missing section data; position: " + viewerPosition);
-		// TODO implement a batch request packet
-		// TODO fetch non-interactive data for "far" sections
+		// request missing data we need
 		{
-			final List<SectionId> missingSectionIds = findMissingSectionIds(workingSet.getRenderableSections().keySet(), renderModelRadius);
-			if (missingSectionIds != null && !missingSectionIds.isEmpty()) {
-				final SectionId[] sectionIds = missingSectionIds.toArray(new SectionId[missingSectionIds.size()]);
-				for (SectionId sectionId : sectionIds) {
-					clientToServerTransmitter.transmit(new SectionDataRequestMessage(new SectionDataId(sectionId, SectionDataType.INTERACTIVE)));
-					logger.debug("requested render model update for section " + sectionId);
-					anythingUpdated = true;
-				}
-			}
+			final List<SectionId> missingRenderModelSectionIds = findMissingSectionIds(workingSet.getRenderableSections().keySet(), renderModelRadius);
+			final List<SectionId> missingColliderSectionIds = findMissingSectionIds(workingSet.getCollidingSections().keySet(), colliderRadius);
+			anythingUpdated |= requestMissingSectionData(missingRenderModelSectionIds, missingColliderSectionIds);
 		}
-
-		// ProfilingHelper.checkRelevant("update sections 2");
-		
-		// detect missing section colliders in the viewer's proximity, then request them all at once
-		// TODO implement a batch request packet
-		{
-			final List<SectionId> missingSectionIds = findMissingSectionIds(workingSet.getCollidingSections().keySet(), colliderRadius);
-			if (missingSectionIds != null && !missingSectionIds.isEmpty()) {
-				final SectionId[] sectionIds = missingSectionIds.toArray(new SectionId[missingSectionIds.size()]);
-				for (SectionId sectionId : sectionIds) {
-					clientToServerTransmitter.transmit(new SectionDataRequestMessage(new SectionDataId(sectionId, SectionDataType.INTERACTIVE)));
-					logger.debug("requested collider update for section " + sectionId);
-					anythingUpdated = true;
-				}
-			}
-		}
-
-		// ProfilingHelper.checkRelevant("update sections 3");
 		
 		return anythingUpdated;
+	}
+	
+	private boolean requestMissingSectionData(List<SectionId> missingRenderModelSectionIds, List<SectionId> missingColliderSectionIds) {
+		
+		// collect IDs for section data we need and send a batch request message
+		// (lazy-create the HashSet to avoid object thrashing)
+		Set<SectionDataId> missingSectionDataIds = null;
+		
+		// render models -- TODO fetch non-interactive data for "far" sections
+		if (missingRenderModelSectionIds != null && !missingRenderModelSectionIds.isEmpty()) {
+			missingSectionDataIds = new HashSet<>();
+			for (SectionId sectionId : missingRenderModelSectionIds) {
+				missingSectionDataIds.add(new SectionDataId(sectionId, SectionDataType.INTERACTIVE));
+				logger.debug("requesting render model update for section " + sectionId);
+			}
+		}
+		
+		// colliders
+		if (missingColliderSectionIds != null && !missingColliderSectionIds.isEmpty()) {
+			if (missingSectionDataIds == null) {
+				missingSectionDataIds = new HashSet<>();
+			}
+			for (SectionId sectionId : missingColliderSectionIds) {
+				missingSectionDataIds.add(new SectionDataId(sectionId, SectionDataType.INTERACTIVE));
+				logger.debug("requested collider update for section " + sectionId);
+			}
+		}
+
+		// check if there is anything to request
+		if (missingSectionDataIds == null) {
+			return false;
+		}
+		
+		// send the request
+		clientToServerTransmitter.transmit(new SectionDataRequestMessage(ImmutableSet.copyOf(missingSectionDataIds)));
+		return true;
+		
 	}
 	
 	/**
@@ -177,7 +187,7 @@ public final class SectionGridLoader {
 	 * @param sectionId the ID of the section to reload
 	 */
 	public void reloadSection(SectionId sectionId) {
-		clientToServerTransmitter.transmit(new SectionDataRequestMessage(new SectionDataId(sectionId, SectionDataType.INTERACTIVE)));
+		clientToServerTransmitter.transmit(new SectionDataRequestMessage(ImmutableSet.of(new SectionDataId(sectionId, SectionDataType.INTERACTIVE))));
 	}
 	
 	/**
@@ -186,49 +196,51 @@ public final class SectionGridLoader {
 	 * @param message the message
 	 */
 	public void handleSectionDataResponse(SectionDataResponseMessage message) {
-
-		// read the section data from the packet
-		final SectionDataId sectionDataId = message.getSectionDataId();
-		if (sectionDataId.getType() != SectionDataType.INTERACTIVE) {
-			return;
-		}
-		final SectionId sectionId = sectionDataId.getSectionId();
-		logger.debug("received interactive section image for section " + sectionId);
-		final Cubes cubes = Cubes.createFromCompressedData(message.getData());
-		logger.debug("created Cubes instance for section " + sectionId);
-		
-		// add a renderable section
-		workingSet.getRenderableSectionsLoadedQueue().add(new RenderableSection(workingSet, sectionId, cubes));
-		
-		// add a colliding section if this section is close enough
-		int dx = Math.abs(sectionId.getX() - viewerPosition.getX());
-		int dy = Math.abs(sectionId.getY() - viewerPosition.getY());
-		int dz = Math.abs(sectionId.getZ() - viewerPosition.getZ());
-		if (dx < colliderRadius + 1 && dy < colliderRadius + 1 && dz < colliderRadius + 1) {
-			new Task() {
-				@Override
-				public void run() {
-					logger.debug("building collider for section " + sectionId);
-					ClusterSize clusterSize = workingSet.getClusterSize();
-					CubeType[] cubeTypes = workingSet.getEngineParameters().getCubeTypes();
-					int size = clusterSize.getSize();
-					byte[] colliderCubes = new byte[size * size * size];
-					for (int x=0; x<size; x++) {
-						for (int y=0; y<size; y++) {
-							for (int z=0; z<size; z++) {
-								colliderCubes[x * size * size + y * size + z] = cubes.getCubeRelative(x, y, z);
+		for (Map.Entry<SectionDataId, byte[]> entry : message.getDataBySectionDataId().entrySet()) {
+			
+			// read the section data from the packet
+			final SectionDataId sectionDataId = entry.getKey();
+			if (sectionDataId.getType() != SectionDataType.INTERACTIVE) {
+				return;
+			}
+			final SectionId sectionId = sectionDataId.getSectionId();
+			logger.debug("received interactive section image for section " + sectionId);
+			final Cubes cubes = Cubes.createFromCompressedData(entry.getValue());
+			logger.debug("created Cubes instance for section " + sectionId);
+			
+			// add a renderable section
+			workingSet.getRenderableSectionsLoadedQueue().add(new RenderableSection(workingSet, sectionId, cubes));
+			
+			// add a colliding section if this section is close enough
+			int dx = Math.abs(sectionId.getX() - viewerPosition.getX());
+			int dy = Math.abs(sectionId.getY() - viewerPosition.getY());
+			int dz = Math.abs(sectionId.getZ() - viewerPosition.getZ());
+			if (dx < colliderRadius + 1 && dy < colliderRadius + 1 && dz < colliderRadius + 1) {
+				new Task() {
+					@Override
+					public void run() {
+						logger.debug("building collider for section " + sectionId);
+						ClusterSize clusterSize = workingSet.getClusterSize();
+						CubeType[] cubeTypes = workingSet.getEngineParameters().getCubeTypes();
+						int size = clusterSize.getSize();
+						byte[] colliderCubes = new byte[size * size * size];
+						for (int x=0; x<size; x++) {
+							for (int y=0; y<size; y++) {
+								for (int z=0; z<size; z++) {
+									colliderCubes[x * size * size + y * size + z] = cubes.getCubeRelative(x, y, z);
+								}
 							}
 						}
+						final AxisAlignedCollider collider = new CubeArrayClusterCollider(clusterSize, sectionId, colliderCubes, cubeTypes);
+						final CollidingSection collidingSection = new CollidingSection(workingSet, sectionId, collider);
+						workingSet.getCollidingSectionsLoadedQueue().add(collidingSection);
+						logger.debug("collider registered for section " + sectionId);
 					}
-					final AxisAlignedCollider collider = new CubeArrayClusterCollider(clusterSize, sectionId, colliderCubes, cubeTypes);
-					final CollidingSection collidingSection = new CollidingSection(workingSet, sectionId, collider);
-					workingSet.getCollidingSectionsLoadedQueue().add(collidingSection);
-					logger.debug("collider registered for section " + sectionId);
-				}
-			}.schedule();
+				}.schedule();
+			}
+			
+			logger.debug("consumed interactive section image for section " + sectionId);
 		}
-		
-		logger.debug("consumed interactive section image for section " + sectionId);
 	}
 	
 	/**

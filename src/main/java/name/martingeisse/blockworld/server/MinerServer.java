@@ -151,10 +151,16 @@ public final class MinerServer {
 
 	/**
 	 * @param session the session
-	 * @param sectionDataId the section data ID
+	 * @param sectionDataIds the section data IDs
 	 */
-	public void shipSectionData(final MinerSession session, final SectionDataId sectionDataId) {
-		sectionToClientShipper.addJob(sectionDataId, session);
+	public void shipSectionData(final MinerSession session, final Set<SectionDataId> sectionDataIds) {
+		for (SectionDataId sectionDataId : sectionDataIds) {
+			// don't give the clients definitive section data to prevent information cheating
+			if (sectionDataId.getType() == SectionDataType.DEFINITIVE) {
+				sectionDataId = new SectionDataId(sectionDataId.getSectionId(), SectionDataType.INTERACTIVE);
+			}
+			sectionToClientShipper.addJob(sectionDataId, session);
+		}
 	}
 
 	/**

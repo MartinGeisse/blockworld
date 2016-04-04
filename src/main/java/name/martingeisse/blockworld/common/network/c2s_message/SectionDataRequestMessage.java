@@ -6,6 +6,7 @@
 
 package name.martingeisse.blockworld.common.network.c2s_message;
 
+import com.google.common.collect.ImmutableSet;
 import name.martingeisse.blockworld.common.protocol.SectionDataId;
 
 /**
@@ -13,22 +14,22 @@ import name.martingeisse.blockworld.common.protocol.SectionDataId;
  */
 public final class SectionDataRequestMessage implements ClientToServerMessage {
 
-	private final SectionDataId sectionDataId;
+	private final ImmutableSet<SectionDataId> sectionDataIds;
 
 	/**
 	 * Constructor.
-	 * @param sectionDataId the ID of the section data to request
+	 * @param sectionDataIds the IDs of the section datas to request
 	 */
-	public SectionDataRequestMessage(final SectionDataId sectionDataId) {
-		this.sectionDataId = sectionDataId;
+	public SectionDataRequestMessage(final ImmutableSet<SectionDataId> sectionDataIds) {
+		this.sectionDataIds = sectionDataIds;
 	}
 
 	/**
-	 * Getter method for the sectionDataId.
-	 * @return the sectionDataId
+	 * Getter method for the sectionDataIds.
+	 * @return the sectionDataIds
 	 */
-	public SectionDataId getSectionDataId() {
-		return sectionDataId;
+	public ImmutableSet<SectionDataId> getSectionDataIds() {
+		return sectionDataIds;
 	}
 
 }

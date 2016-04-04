@@ -21,8 +21,6 @@ import name.martingeisse.blockworld.common.network.s2c_message.ConsoleOutputMess
 import name.martingeisse.blockworld.common.network.s2c_message.FlashMessage;
 import name.martingeisse.blockworld.common.network.s2c_message.ServerToClientMessage;
 import name.martingeisse.blockworld.common.network.s2c_message.UpdateCoinsMessage;
-import name.martingeisse.blockworld.common.protocol.SectionDataId;
-import name.martingeisse.blockworld.common.protocol.SectionDataType;
 import name.martingeisse.blockworld.geometry.EulerAngles;
 import name.martingeisse.blockworld.geometry.Vector3d;
 import name.martingeisse.blockworld.server.network.ServerToClientTransmitter;
@@ -281,12 +279,7 @@ public class MinerSession {
 			leftAngle = typedMessage.getOrientation().getHorizontalAngle();
 			upAngle = typedMessage.getOrientation().getVerticalAngle();
 		} else if (message instanceof SectionDataRequestMessage) {
-			SectionDataId sectionDataId = ((SectionDataRequestMessage)message).getSectionDataId();
-			// don't give the clients definitive section data to prevent information cheating
-			if (sectionDataId.getType() == SectionDataType.DEFINITIVE) {
-				sectionDataId = new SectionDataId(sectionDataId.getSectionId(), SectionDataType.INTERACTIVE);
-			}
-			server.shipSectionData(this, sectionDataId);
+			server.shipSectionData(this, ((SectionDataRequestMessage)message).getSectionDataIds());
 		} else if (message instanceof SingleCubeModificationMessage) {
 			SingleCubeModificationMessage typedMessage = (SingleCubeModificationMessage)message;
 			server.setCube(typedMessage.getX(), typedMessage.getY(), typedMessage.getZ(), typedMessage.getNewCubeTypeIndex(), this);

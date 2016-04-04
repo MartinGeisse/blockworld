@@ -115,7 +115,9 @@ public final class SectionToClientShipper {
 	 * 
 	 */
 	private void send(SectionDataCacheEntry cacheEntry, MinerSession session) {
-		session.sendMessage(new SectionDataResponseMessage(cacheEntry.getSectionDataId(), cacheEntry.getDataForClient()));
+		// TODO bundle multiple results for the same client
+		ImmutableMap<SectionDataId, byte[]> dataBySectionDataId = ImmutableMap.of(cacheEntry.getSectionDataId(), cacheEntry.getDataForClient());
+		session.sendMessage(new SectionDataResponseMessage(dataBySectionDataId));
 	}
 	
 	static volatile long total = 0;

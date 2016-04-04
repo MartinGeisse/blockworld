@@ -6,6 +6,7 @@
 
 package name.martingeisse.blockworld.common.network.s2c_message;
 
+import com.google.common.collect.ImmutableMap;
 import name.martingeisse.blockworld.common.network.c2s_message.SectionDataRequestMessage;
 import name.martingeisse.blockworld.common.protocol.SectionDataId;
 
@@ -15,33 +16,22 @@ import name.martingeisse.blockworld.common.protocol.SectionDataId;
  */
 public final class SectionDataResponseMessage implements ServerToClientMessage {
 
-	private final SectionDataId sectionDataId;
-	private final byte[] data;
+	private final ImmutableMap<SectionDataId, byte[]> dataBySectionDataId;
 
 	/**
 	 * Constructor.
-	 * @param sectionDataId the ID of the section data to request
-	 * @param data the returned section data
+	 * @param dataBySectionDataId a map of sction data ID to requested data
 	 */
-	public SectionDataResponseMessage(final SectionDataId sectionDataId, final byte[] data) {
-		this.sectionDataId = sectionDataId;
-		this.data = data;
+	public SectionDataResponseMessage(final ImmutableMap<SectionDataId, byte[]> dataBySectionDataId) {
+		this.dataBySectionDataId = dataBySectionDataId;
 	}
 
 	/**
-	 * Getter method for the sectionDataId.
-	 * @return the sectionDataId
+	 * Getter method for the dataBySectionDataId.
+	 * @return the dataBySectionDataId
 	 */
-	public SectionDataId getSectionDataId() {
-		return sectionDataId;
+	public ImmutableMap<SectionDataId, byte[]> getDataBySectionDataId() {
+		return dataBySectionDataId;
 	}
 
-	/**
-	 * Getter method for the data.
-	 * @return the data
-	 */
-	public byte[] getData() {
-		return data;
-	}
-	
 }
